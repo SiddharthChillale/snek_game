@@ -60,7 +60,18 @@ void Board::DrawOccupants()
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			
-			if (CheckForOccupancy({ x, y }) == Occupant::Food) {
+			switch (CheckForOccupancy({ x, y })) {
+			case Occupant::Food:
+				DrawCell({ x, y }, foodColor);
+				break;
+			case Occupant::Poison:
+				DrawCell({ x, y }, poisonColor);
+				break;
+			case Occupant::Obstacle:
+				DrawCell({ x, y }, obstacleColor);
+				break;
+			}
+			/*if (CheckForOccupancy({ x, y }) == Occupant::Food) {
 				DrawCell({ x, y }, foodColor);
 			}
 			if (CheckForOccupancy({ x, y }) == Occupant::Poison) {
@@ -68,7 +79,7 @@ void Board::DrawOccupants()
 			}
 			if (CheckForOccupancy({ x, y }) == Occupant::Obstacle) {
 				DrawCell({ x, y }, obstacleColor);
-			}
+			}*/
 
 		}
 	}

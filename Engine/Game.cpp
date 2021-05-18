@@ -91,30 +91,49 @@ void Game::UpdateModel()
 					sndMusic.StopAll();
 				}
 				
+				switch (brd.CheckForOccupancy(next)) {
+				case Board::Occupant::Food: {
+					snek.GrowAndMoveBy(delta_loc);
 
-				if( brd.CheckForOccupancy(next) == Board::Occupant::Food) // If Food is eaten
-				{
-					snek.GrowAndMoveBy( delta_loc );
-						
 					brd.FillOccupancy(next, Board::Occupant::Empty); // set to empty tile
 					brd.SpawnOccupants(rng, snek, Board::Occupant::Obstacle); // spawn obstacle
-					sfxEat.Play( rng,0.8f );
-
+					sfxEat.Play(rng, 0.8f);
+					break;
 				}
-				else if (brd.CheckForOccupancy(next) == Board::Occupant::Poison) // If Poison is eaten
-				{
-					
+				case Board::Occupant::Poison: {
 
 					brd.FillOccupancy(next, Board::Occupant::Empty); // set to empty tile
 					speedUpFactor += 0.1f;    // speed up the snek speed when poison eaten
 					snek.MoveBy(delta_loc);
 					sfxEat.Play(rng, 0.8f);
-
+					break;
 				}
-				else
-				{
+				default: {
 					snek.MoveBy(delta_loc);
 				}
+				}
+				//if( brd.CheckForOccupancy(next) == Board::Occupant::Food) // If Food is eaten
+				//{
+				//	snek.GrowAndMoveBy( delta_loc );
+				//		
+				//	brd.FillOccupancy(next, Board::Occupant::Empty); // set to empty tile
+				//	brd.SpawnOccupants(rng, snek, Board::Occupant::Obstacle); // spawn obstacle
+				//	sfxEat.Play( rng,0.8f );
+
+				//}
+				//else if (brd.CheckForOccupancy(next) == Board::Occupant::Poison) // If Poison is eaten
+				//{
+				//	
+
+				//	brd.FillOccupancy(next, Board::Occupant::Empty); // set to empty tile
+				//	speedUpFactor += 0.1f;    // speed up the snek speed when poison eaten
+				//	snek.MoveBy(delta_loc);
+				//	sfxEat.Play(rng, 0.8f);
+
+				//}
+				//else{
+				//	snek.MoveBy(delta_loc);
+				//}
 
 
 

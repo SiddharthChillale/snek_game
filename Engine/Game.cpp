@@ -28,10 +28,22 @@ Game::Game( MainWindow& wnd )
 	gfx( wnd ),
 	brd( gfx ),
 	rng( std::random_device()() ),
-	snek( {2,2} ),
-	goal( rng,brd,snek )
+	snek( {2,2} )
 {
-	sndTitle.Play( 1.0f,1.0f );
+	//sndTitle.Play( 1.0f,1.0f );
+
+
+
+	for (int i = 0; i < nFoods; i++) {
+		
+		brd.SpawnOccupants(rng, snek, Board::Occupant::Food); // Food
+	}
+	for (int i = 0; i < nPoisons; i++) {
+		brd.SpawnOccupants(rng, snek, Board::Occupant::Poison); // Poison
+	}
+	for (int i = 0; i < nObstacles; i++) {
+		brd.SpawnOccupants(rng, snek, Board::Occupant::Obstacle); // Obstacle
+	}
 }
 
 void Game::Go()
@@ -67,32 +79,47 @@ void Game::UpdateModel()
 				delta_loc = { 1,0 };
 			}
 
-			snekMoveCounter += dt;
+			snekMoveCounter += (speedUpFactor)*dt;
 			if( snekMoveCounter >= snekMovePeriod )
 			{
 				snekMoveCounter -= snekMovePeriod;
 				const Location next = snek.GetNextHeadLocation( delta_loc );
-				if( !brd.IsInsideBoard( next ) ||
-					snek.IsInTileExceptEnd( next ) )
+				if( !brd.IsInsideBoard( next ) || snek.IsInTileExceptEnd( next ) || brd.CheckForOccupancy(next) == Board::Occupant::Obstacle) // If snek has accident
 				{
 					gameIsOver = true;
 					sndFart.Play();
 					sndMusic.StopAll();
 				}
+				
+
+				if( brd.CheckForOccupancy(next) == Board::Occupant::Food) // If Food is eaten
+				{
+					snek.GrowAndMoveBy( delta_loc );
+						
+					brd.FillOccupancy(next, Board::Occupant::Empty); // set to empty tile
+					brd.SpawnOccupants(rng, snek, Board::Occupant::Obstacle); // spawn obstacle
+					sfxEat.Play( rng,0.8f );
+
+				}
+				else if (brd.CheckForOccupancy(next) == Board::Occupant::Poison) // If Poison is eaten
+				{
+					
+
+					brd.FillOccupancy(next, Board::Occupant::Empty); // set to empty tile
+					speedUpFactor += 0.1f;    // speed up the snek speed when poison eaten
+					snek.MoveBy(delta_loc);
+					sfxEat.Play(rng, 0.8f);
+
+				}
 				else
 				{
-					if( next == goal.GetLocation() )
-					{
-						snek.GrowAndMoveBy( delta_loc );
-						goal.Respawn( rng,brd,snek );
-						sfxEat.Play( rng,0.8f );
-					}
-					else
-					{
-						snek.MoveBy( delta_loc );
-					}
-					sfxSlither.Play( rng,0.08f );
+					snek.MoveBy(delta_loc);
 				}
+
+
+
+				sfxSlither.Play( rng,0.08f );
+				
 			}
 			snekMovePeriod = std::max( snekMovePeriod - dt * snekSpeedupFactor,snekMovePeriodMin );
 		}
@@ -112,7 +139,8 @@ void Game::ComposeFrame()
 	if( gameIsStarted )
 	{
 		snek.Draw( brd );
-		goal.Draw( brd );
+		
+		brd.DrawOccupants();
 		if( gameIsOver )
 		{
 			SpriteCodex::DrawGameOver( 350,265,gfx );

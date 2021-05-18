@@ -1,10 +1,13 @@
 #include "Board.h"
 #include <assert.h>
+#include "Snake.h"
 
 Board::Board( Graphics& gfx )
 	:
 	gfx( gfx )
-{}
+{
+	 
+}
 
 void Board::DrawCell( const Location & loc,Color c )
 {
@@ -51,3 +54,51 @@ void Board::DrawBorder()
 	// bottom
 	gfx.DrawRect( left,bottom - borderWidth,right,bottom,borderColor );
 }
+
+void Board::DrawOccupants()
+{
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			
+			if (CheckForOccupancy({ x, y }) == Occupant::Food) {
+				DrawCell({ x, y }, foodColor);
+			}
+			if (CheckForOccupancy({ x, y }) == Occupant::Poison) {
+				DrawCell({ x, y }, poisonColor);
+			}
+			if (CheckForOccupancy({ x, y }) == Occupant::Obstacle) {
+				DrawCell({ x, y }, obstacleColor);
+			}
+
+		}
+	}
+}
+
+Board::Occupant Board::CheckForOccupancy(const Location& loc) const
+{
+	return hasOccupancy[loc.y*width + loc.x];
+}
+
+
+void Board::FillOccupancy(const Location& loc, const Occupant occupant)
+{
+	
+	hasOccupancy[loc.y * width + loc.x] = occupant;
+}
+
+void Board::SpawnOccupants(std::mt19937& rng, const Snake& snek, const Occupant occupant)
+{
+	std::uniform_int_distribution<int> xDist(0, GetGridWidth() - 1);
+	std::uniform_int_distribution<int> yDist(0, GetGridHeight() - 1);
+
+	Location newLoc;
+	do
+	{
+		newLoc.x = xDist(rng);
+		newLoc.y = yDist(rng);
+	} while (snek.IsInTile(newLoc) || CheckForOccupancy(newLoc) != Occupant::Empty );
+
+	hasOccupancy[newLoc.y * width + newLoc.x] = occupant;
+}
+
+

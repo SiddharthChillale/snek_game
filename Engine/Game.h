@@ -25,7 +25,6 @@
 #include "Graphics.h"
 #include "Board.h"
 #include "Snake.h"
-#include "Goal.h"
 #include <random>
 #include "SoundEffect.h"
 #include "FrameTimer.h"
@@ -53,7 +52,7 @@ private:
 	Location delta_loc = {1,0};
 	std::mt19937 rng;
 	FrameTimer ft;
-	Goal goal;
+	
 	SoundEffect sfxEat = SoundEffect( { L"Sounds\\Eat.wav" } );
 	SoundEffect sfxSlither = SoundEffect( { L"Sounds\\Slither0.wav",L"Sounds\\Slither1.wav",L"Sounds\\Slither2.wav" } );
 	Sound sndMusic = Sound( L"Sounds\\Music_Loop.wav",Sound::LoopType::AutoFullSound );
@@ -62,7 +61,12 @@ private:
 	static constexpr float snekMovePeriodMin = 0.06f;
 	float snekMovePeriod = 0.4f;
 	float snekMoveCounter = 0.0f;
+	float speedUpFactor = 1.0f;
 	static constexpr float snekSpeedupFactor = 0.005f;
+	static constexpr int nFoods = 10;
+	static constexpr int nObstacles = 20;
+	static constexpr int nPoisons = 100;
+
 	bool gameIsOver = false;
 	bool gameIsStarted = false;
 	/********************************/
